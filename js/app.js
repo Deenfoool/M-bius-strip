@@ -41,7 +41,7 @@ try {
   initialize();
 } catch (error) {
   console.error('Möbius viewer initialization failed:', error);
-  showError('Не удалось запустить WebGL. Включите аппаратное ускорение или попробуйте другой браузер.');
+  showError(`Не удалось запустить 3D. ${error instanceof Error ? error.message : 'Неизвестная ошибка'}`);
 }
 
 function initialize() {
