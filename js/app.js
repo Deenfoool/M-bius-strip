@@ -1,5 +1,6 @@
 import * as THREE from '../assets/vendor/three.module.min.js';
 import { TrackballControls } from '../assets/vendor/TrackballControls.js';
+import { SoftwareRenderer } from './software-renderer.js';
 import { DEFAULT_RADIUS, createSurfaceData, sampleBoundary, sampleGrid } from './mobius.js';
 
 const $ = id => document.getElementById(id);
@@ -45,7 +46,12 @@ try {
 }
 
 function initialize() {
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'low-power' });
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'low-power' });
+  } catch {
+    renderer = new SoftwareRenderer();
+  }
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -76,11 +82,19 @@ function initialize() {
     plane.lookAt(0, 0, 0);
     studio.add(plane);
   }
-  const pmrem = new THREE.PMREMGenerator(renderer);
-  const environment = pmrem.fromScene(studio, 0.08);
-  scene.environment = environment.texture;
+  let environment;
+  if (!renderer.isSoftwareRenderer) {
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    try {
+      environment = pmrem.fromScene(studio, 0.08);
+      scene.environment = environment.texture;
+    } catch {
+      // Direct lights still illuminate the model if environment maps are unavailable.
+    } finally {
+      pmrem.dispose();
+    }
+  }
   studio.traverse(object => { object.geometry?.dispose(); object.material?.dispose(); });
-  pmrem.dispose();
 
   scene.add(new THREE.HemisphereLight(0xe3f2ee, 0x4b3327, 1.3));
   const key = new THREE.DirectionalLight(0xffe5c8, 2.8);
@@ -109,7 +123,7 @@ function initialize() {
 
   function rebuild() {
     const width = Number($('width').value);
-    const data = createSurfaceData({ width });
+    const data = createSurfaceData({ width, lengthSegments: renderer.isSoftwareRenderer ? 128 : 256, widthSegments: renderer.isSoftwareRenderer ? 16 : 32 });
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(data.positions, 3));
     geometry.setAttribute('normal', new THREE.BufferAttribute(data.normals, 3));
@@ -327,7 +341,7 @@ function initialize() {
     cancelAnimationFrame(requestedFrame);
     cancelAnimationFrame(widthFrame);
     controls.dispose();
-    environment.dispose();
+    environment?.dispose();
     for (const object of [surface, edge, grid]) { object.geometry.dispose(); object.material.dispose(); }
     renderer.dispose();
   });
