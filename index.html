@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#121619">
+    <meta name="description" content="Точная 3D-модель ленты Мёбиуса. Вращайте, приближайте и исследуйте поверхность с одним краем прямо в браузере.">
+    <title>Лента Мёбиуса — интерактивная 3D-модель</title>
+    <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="./style.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="Лента Мёбиуса — главная">
+        <svg viewBox="0 0 40 32" fill="none" aria-hidden="true"><path d="M20 10c-11-14-23 16-10 13 8-2 13-25 21-16 12 13-4 26-11 15" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="M20 10c4 5 6 9 0 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        <span>MÖBIUS<span class="brand-divider">/</span><span class="brand-description">пространство одной стороны</span></span>
+      </a>
+      <div class="top-actions">
+        <span class="live-label"><span></span>Интерактивная модель</span>
+        <button class="icon-button" id="fullscreen" type="button" aria-label="На весь экран" title="На весь экран">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="stage" aria-label="Интерактивная 3D-модель ленты Мёбиуса">
+        <div class="stage-heading"><span class="eyebrow">Геометрия бесконечного</span><h1>Лента Мёбиуса<span>.</span></h1><p>Поверните. Посмотрите с другой стороны.</p></div>
+        <div id="viewport" tabindex="0" role="img" aria-label="3D-лента Мёбиуса. Перетаскивание вращает модель, колесо меняет масштаб, правая кнопка переносит камеру. Также доступны стрелки и кнопки масштаба.">
+          <div class="loading" id="loading" role="status"><span class="loading-ring"></span><span>Создаём поверхность…</span></div>
+          <div class="render-error" id="render-error" role="alert" hidden><strong>Не удалось открыть 3D-модель</strong><p id="error-message">В браузере недоступен WebGL.</p><button id="reload" type="button">Попробовать ещё раз</button></div>
+        </div>
+        <div class="view-label" aria-hidden="true"><span class="view-dot"></span>3D / свободный обзор</div>
+        <div class="stage-tools" aria-label="Управление камерой">
+          <button class="icon-button" id="zoom-in" type="button" aria-label="Приблизить" title="Приблизить (+)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+          <span id="zoom-level" aria-live="off">100%</span>
+          <button class="icon-button" id="zoom-out" type="button" aria-label="Отдалить" title="Отдалить (−)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+          <span class="tool-divider"></span>
+          <button class="icon-button" id="reset-camera" type="button" aria-label="Исходный ракурс" title="Исходный ракурс (R)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10a9 9 0 1 1 2.6 8.4M3 4v6h6"/></svg></button>
+        </div>
+        <div class="stage-footer"><div class="stage-note"><span>Одна поверхность.</span><span>Один непрерывный край.</span></div><div class="mouse-hint"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="6"/><path d="M12 6v4"/></svg><span>Потяните, чтобы вращать</span></div></div>
+      </section>
+
+      <aside class="sidebar" aria-label="Настройки модели">
+        <div class="panel-heading"><span class="eyebrow">Исследуйте форму</span><span class="panel-number">01</span></div>
+        <h2>Настройки модели</h2>
+        <fieldset class="control-group"><legend>Отображение</legend><div class="segmented"><button id="view-surface" type="button" aria-pressed="true">Поверхность</button><button id="view-grid" type="button" aria-pressed="false">Сетка</button></div></fieldset>
+        <fieldset class="control-group"><legend>Материал</legend><div class="swatches"><button class="swatch copper" data-color="copper" type="button" aria-pressed="true" aria-label="Медный материал" title="Медь"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></button><button class="swatch ocean" data-color="ocean" type="button" aria-pressed="false" aria-label="Синий материал" title="Океан"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></button><button class="swatch pearl" data-color="pearl" type="button" aria-pressed="false" aria-label="Белый материал" title="Фарфор"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg></button><span id="material-name">Медь</span></div></fieldset>
+        <div class="control-group"><div class="control-label"><label for="width">Ширина ленты</label><output id="width-value" for="width">1.80</output></div><input id="width" type="range" min="0.7" max="2.8" step="0.05" value="1.8" aria-valuetext="1.80 условных единиц"><div class="range-labels"><span>Узкая</span><span>Широкая</span></div></div>
+        <div class="toggles">
+          <label class="toggle-row" for="boundary"><span><span class="toggle-title">Подсветить край</span><span class="toggle-caption">Одна замкнутая линия</span></span><input type="checkbox" id="boundary"><span class="switch" aria-hidden="true"></span></label>
+          <label class="toggle-row" for="auto-rotate"><span><span class="toggle-title">Автовращение</span><span class="toggle-caption">Медленный обзор формы</span></span><input type="checkbox" id="auto-rotate"><span class="switch" aria-hidden="true"></span></label>
+        </div>
+        <div class="topology-card"><div class="topology-top"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M3 12h18M6 6l12 12M6 18 18 6"/></svg><span>Полуповорот — целый мир</span></div><p>Поверните конец полоски на 180° и соедините с началом. Так две стороны становятся одной.</p><div class="facts"><div><strong>1</strong><span>сторона</span></div><div><strong>1</strong><span>край</span></div><div><strong>180°</strong><span>поворот</span></div></div></div>
+        <details class="help"><summary>Как управлять<span aria-hidden="true">+</span></summary><dl><dt>ЛКМ + перетаскивание</dt><dd>Свободное вращение</dd><dt>Колесо / + и −</dt><dd>Приближение и отдаление</dd><dt>ПКМ + перетаскивание</dt><dd>Перенос камеры</dd><dt>Стрелки / Q и E</dt><dd>Вращение / наклон камеры</dd><dt>R</dt><dd>Исходный ракурс</dd><dt>На телефоне</dt><dd>Один палец — вращение. Два — масштаб и перенос.</dd></dl></details>
+        <a class="repo-link" href="https://github.com/Deenfoool/M-bius-strip" target="_blank" rel="noopener noreferrer">Исходный код<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg></a>
+      </aside>
+    </main>
+    <div class="announcement" id="announcement" role="status" aria-live="polite"></div>
+    <noscript><div class="noscript">Для интерактивной 3D-модели включите JavaScript в настройках браузера.</div></noscript>
+    <script type="module" src="./js/app.js"></script>
+  </body>
+</html>
